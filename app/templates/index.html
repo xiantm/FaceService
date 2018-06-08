@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h4>加载人脸</h4>
+<form action="/face/load">
+    <input type="number" required name="project_id" placeholder="项目号">
+    <input type="submit" value="加载人脸">
+</form>
+<h4>1：N对比</h4>
+<form method="POST" action="/face/compare/1n" enctype="multipart/form-data">
+    <input type="file" required name="file">
+    <input type="text" required placeholder="项目号" name="project_id">
+    <input type="text" required placeholder="偏差（0.1-1）" name="tolerance">
+    <input type="submit" value="1:n对比人脸">
+</form>
+<h4>1：1对比</h4>
+<form method="POST" action="/face/compare/11" enctype="multipart/form-data">
+    <input type="file" required name="file">
+    <input type="text" required placeholder="电子标签" name="rfid">
+    <input type="text" required placeholder="项目号" name="project_id">
+    <input type="text" required placeholder="偏差（0.1-1）" name="tolerance">
+    <input type="submit" value="1:1对比人脸">
+</form>
+<h4>检测人脸</h4>
+<form action="/face/validate" enctype="multipart/form-data" method="POST">
+    <input type="file" required name="file">
+    <input type="submit" value="验证人脸">
+</form>
+</body>
+</html>
+
+
+{#import os#}
+{#from app import db#}
+{#from app.models import Face#}
+{#root_path = os.path.abspath("./images")#}
+{#images = os.listdir(root_path)#}
+{#for img in images:#}
+{#    name = img.split(".")[0]#}
+{#    path = root_path + "/" + img#}
+{#    face = Face(name = name, path = path, rfid = "", project_id = 1)#}
+{#    db.session.add(face)#}
+{#db.session.commit()#}
