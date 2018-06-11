@@ -10,7 +10,7 @@ migrate = Migrate(app, db)
 
 
 # 防止循环导入
-from app import routes, models
+from app import models, routes
 
 
 if __name__ == "__main__":

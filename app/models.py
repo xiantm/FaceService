@@ -1,20 +1,24 @@
 from app import db
 
 
-"""人脸信息
-"""
-
-
 class Face(db.Model):
-
-    __tablename__='ticket_sold'
-
-    sold_id = db.Column(db.Integer,primary_key=True)
-    sold_chip = db.Column(db.String(40))
-    sold_face_photo = db.Column(db.String(200))
-    sold_user_name  = db.Column(db.String(40))
-    ticket_project_id = db.Column(db.String(40))
+    """人脸信息
+    """
+    __tablename__ = 'face'
+    id = db.Column(db.Integer, primary_key=True)
     face_encode = db.Column(db.TEXT)
+    name = db.Column(db.String(40))
+    create_time = db.Column(db.DateTime)
+    group_id = db.Column(db.Integer)
+    face_size = db.Column(db.Integer)
+    file_name = db.Column(db.String(80))
     faces = []
+
     def __repr__(self):
-        return '<Face {}>'.format(self.sold_id)
+        return '<Face {}>'.format(self.id)
+
+
+class Group(db.Model):
+    __tablename__ = "face_group"
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String(50))
