@@ -6,7 +6,7 @@ import os
 from os import path
 from datetime import datetime
 from app.models import Face
-from app import db
+
 
 face_cache = []
 
