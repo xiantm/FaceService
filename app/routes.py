@@ -5,7 +5,7 @@ from app.models import Face
 
 @app.route('/')
 def hello_world():
-    return render_template("index.html")
+    return render_template("index2.html")
 
 
 @app.route('/face/load')
@@ -17,7 +17,7 @@ def load_face():
     project_id = request.args.get("project_id") or request.form["project_id"]
     if len(project_id) < 1:
         return "fail, give me project_id please "
-    face_list = Face.query.filter_by(ticket_project_id=project_id).all()
+    face_list = Face.query.filter_by(project_id=project_id).all()
     if len(face_list) > 0:
         face_recognition_manager.load_img(project_id, face_list)
         return jsonify({'status': 1, 'message': 'success'})
@@ -28,7 +28,7 @@ def load_face():
 def face_compare_1n():
     """
     :param project_id 活动号
-    :param tolerance 识别精度0.1-1越小越准确
+    :param tolerance 识别精度0.74-1越小越准确
     :param file 需要对比的图片
     :return: {"status": status, "image": 图片名称, "name": 用户姓名, "message": message, "sold_id": sold_id}
     """
@@ -44,23 +44,23 @@ def face_compare_1n():
 def face_compare_11():
     """
     :param project_id 活动号
-    :param tolerance 识别精度0.1-1越小越准确
+    :param tolerance 识别精度0.74-1越小越准确
     :param file 需要对比的图片
     :param rfid m1卡号
     :return: {"status": status, "image": 图片名称, "name": 用户姓名, "message": message}
     """
     project_id = request.args.get('project_id') or request.form["project_id"]
     if project_id == '' or project_id is None:
-        return jsonify({"status": -1, "message": '请求缺少project_id'})
+        return jsonify({"status": False, "message": '请求缺少project_id'})
     tol = request.args.get('tolerance') or request.form['tolerance'] or '0.25'
     tolerance = float(tol)
-    rfid = request.args.get('rfid') or request.form['rfid']
-    if rfid == '' or rfid is None:
-        return jsonify({"status": -1, "message": '请求缺少rfid'})
+    sold_id = request.args.get('sold_id') or request.form['sold_id']
+    if sold_id == '' or sold_id is None:
+        return jsonify({"status": False, "message": '请求缺少sold_id'})
     face = request.files['file']
     if face is None:
-        return jsonify({"status": -1, "message": '请求缺少图片文件'})
-    (status, file_path, name, message) = face_recognition_manager.face_compare_11(project_id, face, rfid, tolerance)
+        return jsonify({"status": False, "message": '请求缺少图片文件'})
+    (status, file_path, name, message) = face_recognition_manager.face_compare_11(project_id, face, sold_id, tolerance)
     return jsonify({"status": status, "image": file_path, "name": name, "message": message})
 
 
@@ -76,7 +76,7 @@ def face_validate():
     json, face_size = face_recognition_manager.validate_img(face)
     if face_size > 0:
         return jsonify({
-            'status': '1',
+            'status': '74',
             'face_size': face_size,
             'message': 'success',
             'data': json

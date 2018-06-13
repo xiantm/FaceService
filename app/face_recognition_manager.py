@@ -7,7 +7,7 @@ face_cache = {}
 
 '''存放图片的根路径,docker run -v 挂载地址
 '''
-root_path = '/var/www/images'
+root_path = '/root/face/image'
 
 
 def load_img(project_id, face_list):
@@ -40,22 +40,22 @@ def face_compare_1n(project_id, face_stream, tolerance):
     fm = face_cache.get(project_id)
     if fm:
         return fm.compare_1_n(face_stream, tolerance)
-    return -1, None, None, "活动号配置错误",None
+    return False, None, None, "活动号配置错误",None
 
 
-def face_compare_11(project_id, face_stream, rfid, tolerance):
+def face_compare_11(project_id, face_stream, sold_id, tolerance):
     fm = face_cache.get(project_id)
     if fm:
-        return fm.compare_1_1(face_stream, rfid, tolerance)
-    return -1, None, None, "活动号配置错误"
+        return fm.compare_1_1(face_stream, sold_id, tolerance)
+    return False, None, None, "活动号配置错误"
 
 
 def validate_img(face_stream):
-    '''
+    """
     验证人脸
     :param face_stream:
     :return: 人脸特征，识别出的人脸数目
-    '''
+    """
     img = face_recognition.load_image_file(face_stream)
     face_list = face_recognition.face_encodings(img)
     if len(face_list) > 0:
@@ -76,9 +76,9 @@ class FaceRecognitionManger(object):
         self.project_id = project_id
 
     def compare_1_n(self, file_stream, tolerance):
-        """1：n对比人脸,需要返回人名
+        """74：n对比人脸,需要返回人名
         :param file_stream: 识别文件流
-        :param tolerance: 识别准确度 (0.1 - 1 )
+        :param tolerance: 识别准确度 (0.74 - 74 )
         :return: (是否对比成功,文件路径,人名,提示信息,sold_id)
         """
         img = face_recognition.load_image_file(file_stream)
@@ -95,15 +95,15 @@ class FaceRecognitionManger(object):
             return False, None, None, "未检测出人脸", None
         return False, None, None, "人脸对比失败", None
 
-    def compare_1_1(self, file_stream, rfid, tolerance):
-        """1：1对比人脸
+    def compare_1_1(self, file_stream, sold_id, tolerance):
+        """74：1对比人脸
         :param file_stream: 识别文件流
         :param rfid: 电子标签信息
-        :param tolerance: 识别准确度 (0.1 - 1)
+        :param tolerance: 识别准确度 (0.74 - 74)
         :return: (0对比失败1对比成功2第一次对比3未找到人脸,文件路径,人名,提示信息)
         """
         for item in self.faceList:
-            if rfid == item.sold_chip:
+            if sold_id == item.sold_id:
                 img = face_recognition.load_image_file(file_stream)
                 unknown_face = face_recognition.face_encodings(img)
                 if len(unknown_face) > 0:
@@ -113,15 +113,15 @@ class FaceRecognitionManger(object):
                             match_results = face_recognition.compare_faces(item.faces, item_unknown, tolerance)
                             for item_result in match_results:
                                 if item_result:
-                                    return 1, item.sold_face_photo, item.sold_user_name, "人脸对比成功"
-                        return 0, None, None, "人脸对比失败"
+                                    return True, item.sold_face_photo, item.sold_user_name, "人脸对比成功"
+                        return False, None, None, "人脸对比失败"
                     # 没有存留图片保存存留图片
                     else:
                         item.faces = unknown_face
                         item.face_encode = json.dumps([encode.tolist() for encode in item.faces])
                         db.session.add(item)
                         db.session.commit()
-                        return 2, item.sold_face_photo, item.sold_user_name, "人脸已保存"
+                        return True, item.sold_face_photo, item.sold_user_name, "人脸已保存"
                 else:
-                    return 3, None, None, "未检测出人脸"
-        return 0, None, None, "无效票证"
+                    return False, None, None, "未检测出人脸"
+        return False, None, None, "无效票证"

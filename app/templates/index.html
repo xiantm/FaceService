@@ -5,43 +5,73 @@
     <title>Title</title>
 </head>
 <body>
-<h4>加载人脸</h4>
-<form action="/face/load">
-    <input type="number" required name="project_id" placeholder="项目号">
-    <input type="submit" value="加载人脸">
-</form>
-<h4>1：N对比</h4>
-<form method="POST" action="/face/compare/1n" enctype="multipart/form-data">
-    <input type="file" required name="file">
-    <input type="text" required placeholder="项目号" name="project_id">
-    <input type="text" required placeholder="偏差（0.1-1）" name="tolerance">
-    <input type="submit" value="1:n对比人脸">
-</form>
-<h4>1：1对比</h4>
-<form method="POST" action="/face/compare/11" enctype="multipart/form-data">
-    <input type="file" required name="file">
-    <input type="text" required placeholder="电子标签" name="rfid">
-    <input type="text" required placeholder="项目号" name="project_id">
-    <input type="text" required placeholder="偏差（0.1-1）" name="tolerance">
-    <input type="submit" value="1:1对比人脸">
-</form>
-<h4>检测人脸</h4>
+<h4>验证图片是否存在人脸</h4>
+<pre>
+    POST -> http://ip:port/face/validate
+    param file 需要对比的图片
+    return: {"status": status,"message": message,'face_size': 人脸数}
+</pre>
 <form action="/face/validate" enctype="multipart/form-data" method="POST">
     <input type="file" required name="file">
-    <input type="submit" value="验证人脸">
+    <input type="submit" formtarget="_blank" value="验证人脸">
 </form>
+<h4>1：1对比</h4>
+<pre>
+    POST -> http://ip:port/face/compare/11
+    param source 原图片
+    param target 对比图片
+    param tolerance 偏差
+    return: {"status": True/False,"message": matching/mismatching}
+</pre>
+<form method="POST" action="/face/compare/11" enctype="multipart/form-data">
+    <input type="file" placeholder="原图片" required name="source">
+    <input type="file" placeholder="对比图片" required name="target">
+    <input type="text" required placeholder="偏差（0.1-1）" name="tolerance">
+    <input type="submit" formtarget="_blank" value="对比人脸">
+</form>
+<h4>添加人脸</h4>
+<pre>
+    POST -> http://ip:port/face/add
+    param file 需要上传的图片
+    param name 姓名
+    param group_id 组ID
+    return: {"status": true/false,"message": message}
+</pre>
+<form method="POST" action="/face/add" enctype="multipart/form-data">
+    <input type="file" required name="file">
+    <input type="text" required placeholder="姓名" name="name">
+    <input type="text" required placeholder="组ID" name="group_id">
+    <input type="submit" formtarget="_blank" value="添加">
+</form>
+<h4>验证人脸是否存在</h4>
+<pre>
+    POST -> http://ip:port/face/exists
+    param file 需要对比的图片
+    param tolerance 偏差
+    param group_id 组id
+    return: {"status": status, "file_path": 图片地址, "name": 用户姓名, "message": message}
+</pre>
+<form method="POST" action="/face/exists" enctype="multipart/form-data">
+    <input type="file" required name="file">
+    <input type="text" required placeholder="组ID" name="group_id">
+    <input type="text" required placeholder="偏差（0.1-1）" name="tolerance">
+    <input type="submit" formtarget="_blank" value="验证">
+</form>
+
+<h4>查找出所有包含人脸的照片</h4>
+<pre>
+    POST -> http://ip:port/face/findall
+    param file 需要对比的图片
+    param tolerance 偏差
+    param group_id 组id
+    return: {"status": status, data:[]图片集合, "message": message}
+</pre>
+<form method="POST" action="/face/findall" enctype="multipart/form-data">
+    <input type="file" required name="file">
+    <input type="text" required placeholder="组ID" name="group_id">
+    <input type="text" required placeholder="偏差（0.1-1）" name="tolerance">
+    <input type="submit" formtarget="_blank" value="查找">
+</form>
+
 </body>
 </html>
-
-
-{#import os#}
-{#from app import db#}
-{#from app.models import Face#}
-{#root_path = os.path.abspath("./images")#}
-{#images = os.listdir(root_path)#}
-{#for img in images:#}
-{#    name = img.split(".")[0]#}
-{#    path = root_path + "/" + img#}
-{#    face = Face(name = name, path = path, rfid = "", project_id = 1)#}
-{#    db.session.add(face)#}
-{#db.session.commit()#}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/face/load" enctype="multipart/form-data">
+    <input type="number" name="project_id">
+    <input type="submit" value="加载">
+</form>
+<form action="/face/compare/1n" method="post" enctype="multipart/form-data">
+    <input type="number" required name="project_id">
+    <input type="text" required name="tolerance">
+    <input type="file" required name="file">
+    <input type="submit" value="1:n">
+</form>
+</body>
+</html>

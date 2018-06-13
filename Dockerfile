@@ -1,4 +1,4 @@
-FROM xinatm/face_recognization
+FROM xiantm/face-recognization
 
 #维护者信息
 MAINTAINER xiantm xiantm@gmail.com
