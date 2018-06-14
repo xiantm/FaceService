@@ -15,4 +15,4 @@ ENV FLASK_APP  face_service.py
 
 EXPOSE 5000 80
 
-ENTRYPOINT ["./boot.sh"]
+#ENTRYPOINT ["./boot.sh"]

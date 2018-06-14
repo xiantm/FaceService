@@ -103,7 +103,7 @@ class FaceRecognitionManger(object):
         :return: (0对比失败1对比成功2第一次对比3未找到人脸,文件路径,人名,提示信息)
         """
         for item in self.faceList:
-            if sold_id == item.sold_id:
+            if sold_id == str(item.sold_id):
                 img = face_recognition.load_image_file(file_stream)
                 unknown_face = face_recognition.face_encodings(img)
                 if len(unknown_face) > 0:
