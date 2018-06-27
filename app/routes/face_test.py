@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from flask import redirect, Blueprint, request, jsonify
+from app.utils import face_detect as detect
 from config import image_path
 import uuid
 import face_recognition
@@ -7,17 +8,23 @@ import requests
 
 face_cache = []
 images = os.listdir(image_path)
-for image in images:
-    img = face_recognition.load_image_file(image_path + "/" + image)
-    code_list = face_recognition.face_encodings(img)
-    face_cache.append({
-        'id': str(uuid.uuid4()),
-        'file_name': image,
-        'file_path': 'http://192.168.0.99:5000/static/image/{}'.format(image),
-        'code': code_list
-    })
-
+# for image in images:
+#     img = face_recognition.load_image_file(image_path + "/" + image)
+#     code_list = face_recognition.face_encodings(img)
+#     face_cache.append({
+#         'id': str(uuid.uuid4()),
+#         'file_name': image,
+#         # 'file_path': 'http://192.168.0.99:5000/static/image/{}'.format(image),
+#         'file_path': '/static/image/{}'.format(image),
+#         'code': code_list
+#     })
+#
 facetest = Blueprint('facetest', __name__)
+
+
+@facetest.route('/')
+def index():
+    return redirect('/static/test.html')
 
 
 @facetest.route('/detectbyfile', methods=['POST'])
@@ -41,33 +48,20 @@ def detect_by_url():
     return result
 
 
-def detect(file):
-    img = face_recognition.load_image_file(file)
-    try:
-        locations = face_recognition.face_locations(img)
-        landmarks = face_recognition.face_landmarks(img, locations)
-    except:
-        return jsonify(msg='url is not picture', ret=1, data={})
-    face = []
-    for i in range(0, len(locations)):
-        face.append({'location': locations[i], 'landmark': landmarks[i]})
-    return jsonify(msg='ok', ret=0, data={'face_size': len(locations), 'face': face})
-
-
 @facetest.route('/match', methods=['POST'])
 def match():
     image1 = 'image1' in request.files and request.files['image1'] or None
     image2 = 'image2' in request.files and request.files['image2'] or None
     if image1 is None or image2 is None:
-        return jsonify(msg='2 image must be upload', ret=1, data={'similarity': 0})
+        return jsonify(msg='2 image must be upload', ret=3, data={'similarity': 1})
     face_data1 = face_recognition.load_image_file(image1)
     face_list1 = face_recognition.face_encodings(face_data1)
     if len(face_list1) == 0:
-        return jsonify(msg='find no face in image1', ret=1, data={'similarity': 0})
+        return jsonify(msg='find no face in image1', ret=1, data={'similarity': 1})
     face_data2 = face_recognition.load_image_file(image2)
     face_list2 = face_recognition.face_encodings(face_data2)
     if len(face_list2) == 0:
-        return jsonify(msg='find no face in image2', ret=1, data={'similarity': 0})
+        return jsonify(msg='find no face in image2', ret=2, data={'similarity': 1})
     # 获取两张照片对比人脸的最小差值
     distance = 1
     for face in face_list1:
@@ -139,6 +133,7 @@ def search_by_url():
     result = search(filename)
     os.remove(filename)
     return result
+
 
 def search(file):
     try:

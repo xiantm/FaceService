@@ -3,7 +3,10 @@ dlib>=19.3.0
 numpy
 Flask
 flask-sqlalchemy
-flask-migrate
+flask_script
+flask_migrate
 gunicorn
+gevent
+flask_cors
 requests
 face_recognition

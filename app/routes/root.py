@@ -6,10 +6,10 @@ root = Blueprint('root', __name__)
 
 @root.route('/')
 def hello_world():
-    return render_template("index2.html")
+    return render_template("index.html")
 
 
-@root.route('/face/add', methods=['POST'])
+@root.route('/f/add', methods=['POST'])
 def face_add():
     group_id = request.args.get("group_id") or request.form["group_id"]
     file = request.files['file']
@@ -20,7 +20,7 @@ def face_add():
     return jsonify(status=status, message="find {} face".format(face_size))
 
 
-@root.route('/face/exists', methods=['POST'])
+@root.route('/f/exists', methods=['POST'])
 def face_exists():
     """
     :param group_id 活动号
@@ -38,7 +38,7 @@ def face_exists():
     return jsonify(status=status, message=message, file_path=file_name, name=name, file_size=file_size)
 
 
-@root.route('/face/findall', methods=['POST'])
+@root.route('/f/findall', methods=['POST'])
 def face_find_all():
     """
     判断图片的人脸是否存在
@@ -57,7 +57,7 @@ def face_find_all():
     return jsonify(status=status, message=message, data=data)
 
 
-@root.route('/face/compare/11', methods=['POST'])
+@root.route('/f/compare/11', methods=['POST'])
 def face_compare_11():
     """
     :param tolerance 识别精度0.1-1越小越准确
@@ -76,7 +76,7 @@ def face_compare_11():
     return jsonify(status=status, message=message)
 
 
-@root.route('/face/validate', methods=['POST'])
+@root.route('/f/validate', methods=['POST'])
 def face_validate():
     """
     :param file 需要对比的图片

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/css/demo.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/component.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/default.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
+    <title>人脸识别系统</title>
+    <script src="/static/js/jquery-1.7.2.min.js"></script>
+    <script src="/static/js/modernizr.js" type="text/javascript"></script>
+    <style>
+        html{
+            background: #effaff;
+        }
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .loader-5 {
+            border: 8px dotted rgba(255, 255, 0, 1);
+            -webkit-transition: all 1s ease;
+            transition: all 1s ease;
+            -webkit-animation: dotted-spin 1s linear infinite;
+            animation: dotted-spin 1s linear infinite;
+            border-bottom-width: 1px;
+            border-bottom-color: rgba(255, 255, 0, 0.3);
+            border-left-width: 2px;
+            border-left-color: rgba(255, 255, 0, 0.5);
+            border-top-width: 3px;
+            border-right-width: 4px;
+            border-top-color: rgba(255, 255, 0, 0.7);
+        }
+        .loader-pacman {
+            position: absolute;
+            top: 40px;
+            left: 25px;
+            width: 0px;
+            height: 0px;
+            border-right: 12px solid transparent;
+            border-top: 12px solid rgba(255, 255, 0, 1);
+            border-left: 12px solid rgba(255, 255, 0, 1);
+            border-bottom: 12px solid rgba(255, 255, 0, 1);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .loading{
+            width: 400px;
+            height: 400px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: .5;
+            z-index: 9;
+            background: black;
+        }
+        .loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @-webkit-keyframes dotted-spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(-360deg);
+                transform: rotate(-360deg);
+            }
+        }
+        @keyframes dotted-spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(-360deg);
+                transform: rotate(-360deg);
+            }
+        }
+        .string { color: green; }
+        .number { color: darkorange; }
+        .boolean { color: blue; }
+        .null { color: magenta; }
+        .key { color: red; }
+        .fileUpload1{
+            margin-top: 20px;
+            width: 400px;
+            height: 40px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border-radius: 20px;
+        }
+        .fileUpload1:before{
+            position: absolute;
+            left: 0;
+            top: 0;
+            content: '提交';
+            line-height: 40px;
+            text-align: center;
+            font-size: 16px;
+            color: #fff;
+            background: #00a4ff;
+            border-radius: 20px;
+            width: 100%;
+            height: 100%;
+        }
+        .response-load,.result-load{
+            width: 100%;
+            height: 95%;
+        }
+    </style>
+    <!--[if IE]>
+    <script src="http://cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+    <div id="tabs" class="tabs">
+        <nav>
+            <ul>
+                <li><a href="#section-1"><span>人脸识别</span></a></li>
+                <li><a href="#section-2"><span>人脸检测与分析</span></a></li>
+                <!--<li><a href="#section-3"><span>人脸搜索</span></a></li>-->
+            </ul>
+        </nav>
+        <div class="content">
+            <section id="section-1">
+                <form enctype="multipart/form-data" id="formData">
+                    <div class="mediabox1">
+                        <div class="square"  id="image_left"></div>
+                    </div>
+                    <div class="mediabox2">
+                        <div class="loading" style="display: none">
+                            <div class="loader loader-5">
+                                <div class="loader-pacman"></div>
+                            </div>
+                        </div>
+                        <div class="similar-score"></div>
+                        <input style="border:0" type="submit" class="verify-button" value="人脸对比">
+                    </div>
+                    <div class="mediabox3">
+                        <div class="square"  id="image_right"></div>
+                    </div>
+                    <div style="position: relative">
+                        <div class="leftCon">
+                            <div class="fileUpload">
+                                <input class="upload" type="file" name="image1" onchange="selectImage(this,'image_left','div')"/>
+                            </div>
+                        </div>
+                        <div style="float: left;margin-left: 80px;margin-top: 100px;">
+                            <label for="r2">请选择精度(越往右越精确)</label>
+                            <label class="accuracy" style="display: block">精度为：60</label>
+                            <input style="margin: 0" type='range' id='r2' class='tip fill' min="1" max="100" value='60' />
+                        </div>
+                        <div class="rightCon">
+                            <div class="fileUpload">
+                                <input class="upload" type="file" name="image2" onchange="selectImage(this,'image_right','div')"/>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </section>
+            <section id="section-2">
+                <form enctype="multipart/form-data" id="form_detect">
+                <div class="tab-cont">
+                    <div class="demo-box">
+                        <div class="img-preview">
+                            <img id="preview" style="width: auto;height: 100%;margin-top: 0px;"  src="" alt="">
+                            <label class="label_img">原始图片</label>
+                        </div>
+                        <div class="leftCon" style="margin-left: 100px;">
+                            <div class="fileUpload">
+                                <input class="upload" type="file" name="image" onchange="selectImage(this,'preview','input')"/>
+                            </div>
+                            <div class="fileUpload1">
+                                <input class="upload" type="submit"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-box">
+                        <div class="loading response-load" style="display: none">
+                            <div class="loader loader-5">
+                                <div class="loader-pacman"></div>
+                            </div>
+                        </div>
+                        <div class="img-preview" style="overflow-y: auto;">
+                            <label class="label_img">RESPONSE JSON</label>
+                            <div id="pre_detect">
+                                <pre style="text-align: left"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </section>
+            <!--<section id="section-3">-->
+                <!--<form enctype="multipart/form-data" id="form_search">-->
+                    <!--<div class="tab-cont">-->
+                        <!--<div class="demo-box">-->
+                            <!--<div class="img-preview">-->
+                                <!--<img id="search" style="width: auto;height: 100%;margin-top: 0px;"  src="img/timg(6).jpg" alt="">-->
+                                <!--<label class="label_img">原始图片</label>-->
+                            <!--</div>-->
+                            <!--<div class="leftCon" style="margin-left: 100px;">-->
+                                <!--<div class="fileUpload">-->
+                                    <!--<input class="upload" type="file" name="image_left" onchange="selectImage(this,'search','input')"/>-->
+                                <!--</div>-->
+                                <!--<div class="fileUpload1">-->
+                                    <!--<input class="upload" type="submit"/>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="demo-box">-->
+                            <!--<div class="loading result-load" style="display: none">-->
+                                <!--<div class="loader loader-5">-->
+                                    <!--<div class="loader-pacman"></div>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <!--<div class="img-preview">-->
+                                <!--<label class="label_img">搜索结果</label>-->
+                                <!--<div class="sec"></div>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</form>-->
+            <!--</section>-->
+        </div><!-- /content -->
+    </div><!-- /tabs -->
+</div>
+<script src="/static/js/cbpFWTabs.js"></script>
+<script src='/static/js/stopExecutionOnTimeout.js?t=1'></script>
+<script>
+    var range_els = document.querySelectorAll('input[type=range]'), n = range_els.length, style_el = document.createElement('style'), styles = [], track_sel = [
+        '::-moz-range-track',
+        '::-webkit-slider-runnable-track',
+        ' /deep/ #track'
+    ], thumb_sel = [
+        '::-webkit-slider-thumb',
+        ' /deep/ #thumb'
+    ], a = ':after', b = ':before', s = [
+        '',
+        '%',
+        '%'
+    ];
+    document.body.appendChild(style_el);
+    for (var i = 0; i < n; i++) {
+        if (window.CP.shouldStopExecution(1)) {
+            break;
+        }
+        styles.push('');
+        range_els[i].addEventListener('input', function () {
+            var idx = this.id.split('r')[1] - 1, base_sel = '.js #' + this.id, str = '', min = this.min || 0, max = this.max || 100, c_style, u, edge_w, val;
+            this.setAttribute('value', this.value);
+            $('.accuracy').html('精度为：'+this.value); 
+            if (this.classList.contains('tip')) {
+                str += base_sel + thumb_sel[0] + a + ',' + base_sel + thumb_sel[1] + a + '{content:"' + this.value + s[idx] + '"}';
+            }
+            if (this.classList.contains('fill')) {
+                if (idx == 0) {
+                    c_style = getComputedStyle(this);
+                    u = c_style.backgroundSize.split(' ')[0].split('px')[0];
+                    edge_w = (c_style.width.split('px')[0] - u * (max - min)) / 2;
+                    val = (this.value - min) * u + edge_w + 'px';
+                } else {
+                    val = this.value + '%';
+                }
+                if (this.classList.contains('fill-replace')) {
+                    str += base_sel + track_sel[0] + '{background-size:' + val + '}';
+                }
+                str += base_sel + track_sel[1] + a + ',' + base_sel + track_sel[2] + a + '{width:' + val + '}';
+            }
+            styles[idx] = str;
+            style_el.textContent = styles.join('');
+        }, false);
+    }
+    window.CP.exitedLoop(1);
+    new CBPFWTabs( document.getElementById( 'tabs' ) );
+    function syntaxHighlight(json) {
+        if (typeof json != 'string') {
+            json = JSON.stringify(json, undefined, 2);
+        }
+        json = json.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+            var cls = 'number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'key';
+                } else {
+                    cls = 'string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
+    function selectImage(file,name,type){
+        if(!file.files || !file.files[0]){
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function(evt){
+            if(type=='div'){
+                document.getElementById(name).style.backgroundImage = 'url("'+evt.target.result+'")';
+            }else {
+                document.getElementById(name).src = evt.target.result;
+            }
+        };
+        reader.readAsDataURL(file.files[0]);
+    }
+    $('#formData').submit((e)=>{
+        $('.loading')[0].style.display = 'block';
+        $(".similar-score").html('');
+        let precision = 1-($('#r2').val()/100)
+        e.preventDefault();
+        $.ajax({
+            url :'/facetest/match',
+            type : 'POST',
+            processData: false,
+            contentType: false,
+            data: new FormData($('#formData')[0]),
+            dataType:'json',
+            success:(data)=> {
+                $('.value').html(data.data.similarity);
+                $('.loading')[0].style.display = 'none';
+                if (data.ret == 1){
+                    $(".similar-score").css({
+                        'color':'tomato'
+                     })
+                    $(".similar-score").html('左图未检测到人脸')
+                    return 
+                }
+                if (data.ret == 2){
+                    $(".similar-score").css({
+                        'color':'tomato'
+                     })
+                    $(".similar-score").html('右图未检测到人脸')
+                    return 
+                }
+                if (data.ret == 3){
+                    $(".similar-score").css({
+                        'color':'tomato'
+                     })
+                    $(".similar-score").html('请上传两张图片')
+                    return 
+                }
+                if(data.data.similarity>=precision){
+                    $(".similar-score").css({
+                        'color':'tomato'
+                     })
+                    $(".similar-score").html('不通过')
+                }else{
+                     $(".similar-score").css({
+                        'color':'#40ddb0'
+                     })
+                    $(".similar-score").html('通过')
+                }
+            },
+        })
+    });
+    $('#form_detect').submit((e)=>{
+        $('.response-load')[0].style.display = 'block';
+        e.preventDefault();
+        $.ajax({
+            url :'/facetest/detectbyfile',
+            type : 'POST',
+            processData: false,
+            contentType: false,
+            data: new FormData($('#form_detect')[0]),
+            dataType:'json',
+            success:(res)=> {
+                $('.response-load')[0].style.display = 'none';
+                $('#pre_detect pre').html(syntaxHighlight(res.data))
+            },
+        })
+    });
+
+//    $('#form_search').submit((e)=>{
+//        var imgsArr = [];
+//        var imgsList = [];
+//        const this_ = this;
+//        $('.result-load')[0].style.display = 'block';
+//        e.preventDefault();
+//        let imgs = '';
+//        $.ajax({
+//            url: 'http://192.168.0.99:5000/facetest/images',
+//            success(data){
+//                imgsArr = data;
+//                $.post('http://192.168.0.99:5000/facetest/searchbyurl',{
+//                    url:'http://www.zbor.cn/uploadpic/201192983448216.jpg'
+//                },(data)=>{
+//                    $('.result-load')[0].style.display = 'none';
+//                    imgsList = data.data.candidates;
+//                    for (let i = 0;i<imgsArr.length;i++){
+//                        for(let g = 0;g<imgsList.length;g++){
+//                            console.log(imgsArr[i].id)
+//                            console.log(imgsList[g].id)
+//                            if(imgsArr[i].id==imgsList[g].id){
+//                                let num = null;
+//                                num = imgsList[g].distance.toFixed(2);
+//                                imgs+="<div class='sec-img'><img src='"+imgsArr[i].file_path+"' alt=''><p>"+num+"</p></div>"
+//                            }
+//                        }
+//                    }
+//                    $('.sec').html(imgs);
+//                });
+//            }
+//        })
+//
+//    });
+
+</script>
+</body>
+</html>
